@@ -1,0 +1,11 @@
+{
+    "canisters": {
+        "counter": {
+            "type": "custom",
+            "build": "cargo build --target wasm32-unknown-unknown --release",
+            "candid": "counter.did",
+            "wasm": "target/wasm32-unknown-unknown/release/counter.wasm",
+            "shrink": true
+        }
+    }
+}
