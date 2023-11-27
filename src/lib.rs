@@ -1,37 +1,41 @@
 include!(concat!(env!("OUT_DIR"), "/counter.rs"));
 
-#[derive(Default)]
-struct Canister {
-    counter: u64,
+struct Canister;
+
+use std::cell::RefCell;
+
+thread_local! {
+    static COUNTER: RefCell<u64> = RefCell::new(0);
 }
 
 impl Counter for Canister {
-    async fn inc(&mut self) {
-        self.counter += 1;
+    async fn inc() {
+        COUNTER.with_borrow_mut(|c| *c += 1);
     }
 
-    fn read(&self) -> u64 {
-        self.counter
+    fn read() -> u64 {
+        COUNTER.with_borrow(|c| *c)
     }
 
-    fn canister_init(&mut self, arg0: Option<u64>) {
+    fn canister_init(arg0: Option<u64>) {
         // set the counter with start value or default 0
-        self.counter = arg0.unwrap_or(0);
+        COUNTER.with_borrow_mut(|c| *c = arg0.unwrap_or(0));
     }
 
-    fn canister_pre_upgrade(&mut self) {
+    fn canister_pre_upgrade() {
         // save the counter value into stable memory
-        ic_cdk::storage::stable_save((self.counter,)).unwrap();
+        let c = Self::read();
+        ic_cdk::storage::stable_save((c,)).unwrap();
     }
 
-    fn canister_post_upgrade(&mut self, arg0: Option<u64>) {
+    fn canister_post_upgrade(arg0: Option<u64>) {
         match arg0 {
             // set the counter with new start value
-            Some(new_start) => self.counter = new_start,
+            Some(new_start) => COUNTER.with_borrow_mut(|c| *c = new_start),
             // restore the counter value from stable memory
             None => {
                 let (previous,): (u64,) = ic_cdk::storage::stable_restore().unwrap();
-                self.counter = previous;
+                COUNTER.with_borrow_mut(|c| *c = previous);
             }
         }
     }

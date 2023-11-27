@@ -2,22 +2,22 @@ use std::path::Path;
 
 static BINDING: &str = r###"trait Counter {
     /// update method: `inc`
-    async fn inc(&mut self);
+    async fn inc();
     /// query method: `read`
-    fn read(&self) -> u64;
+    fn read() -> u64;
     /// lifecycle method: `canister_init`
-    fn canister_init(&mut self, arg0: Option<u64>);
+    fn canister_init(arg0: Option<u64>);
     /// lifecycle method: `canister_pre_upgrade`
-    fn canister_pre_upgrade(&mut self);
+    fn canister_pre_upgrade();
     /// lifecycle method: `canister_post_upgrade`
-    fn canister_post_upgrade(&mut self, arg0: Option<u64>);
+    fn canister_post_upgrade(arg0: Option<u64>);
 }
 
 #[export_name = "canister_update inc"]
 fn __canister_method_inc() {
     ic_cdk::setup();
     ic_cdk::spawn(async {
-        let _result = CANISTER.lock().unwrap().inc().await;
+        let _result = Canister::inc().await;
         ic_cdk::api::call::reply(())
     });
 }
@@ -26,7 +26,7 @@ fn __canister_method_inc() {
 fn __canister_method_read() {
     ic_cdk::setup();
     ic_cdk::spawn(async {
-        let result = CANISTER.lock().unwrap().read();
+        let result = Canister::read();
         ic_cdk::api::call::reply((result,))
     });
 }
@@ -36,7 +36,7 @@ fn __canister_init() {
     ic_cdk::setup();
     ic_cdk::spawn(async {
         let (arg0,) = ic_cdk::api::call::arg_data();
-        let _result = CANISTER.lock().unwrap().canister_init(arg0);
+        let _result = Canister::canister_init(arg0);
     });
 }
 
@@ -44,7 +44,7 @@ fn __canister_init() {
 fn __canister_pre_upgrade() {
     ic_cdk::setup();
     ic_cdk::spawn(async {
-        let _result = CANISTER.lock().unwrap().canister_pre_upgrade();
+        let _result = Canister::canister_pre_upgrade();
     });
 }
 
@@ -53,12 +53,9 @@ fn __canister_post_upgrade() {
     ic_cdk::setup();
     ic_cdk::spawn(async {
         let (arg0,) = ic_cdk::api::call::arg_data();
-        let _result = CANISTER.lock().unwrap().canister_post_upgrade(arg0);
+        let _result = Canister::canister_post_upgrade(arg0);
     });
 }
-
-static CANISTER: once_cell::sync::Lazy<std::sync::Mutex<Canister>> =
-    once_cell::sync::Lazy::new(|| std::sync::Mutex::new(Default::default()));
 "###;
 
 fn main() {
