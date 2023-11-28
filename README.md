@@ -9,9 +9,7 @@ In [`build.rs`](build.rs):
 ```rust
 ic_cdk_bindgen::ProviderConfig::new()
     .async_methods(&["inc"])         // specify the methods to be async
-    .init()                          // include the canister_init method
-    .pre_upgrade()                   // include the canister_pre_upgrade method
-    .post_upgrade()                  // include the canister_post_upgrade method
+    .lifecycle_methods(&["init", "pre_upgrade", "post_upgrade"]) // include the lifecycle methods
     .generate("counter.did")         // generate the binding from the specified path of Candid file
 ```
 
