@@ -15,7 +15,7 @@ ic_cdk_bindgen::ProviderConfig::new()
 
 ## The generated code
 
-The generated code is hard coded in this simulation as `BINDING` in [`build.rs`](build.rs).
+The generated code is hard coded in [`counter.rs`](counter.rs) for this simulation.
 
 ## Async methods
 
